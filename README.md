@@ -163,8 +163,10 @@ $ systemctl status user1-tomcat.service
 
 **3. Run the pipeline**
 
-This pipeline demostrates multiple tomcat server installation(v9.0.1) on same machine. 
+This pipeline demostrates tomcat server installation with v9.0.1.
+
 ![Execution log 1](/images/execution_log_1.png)
 ![Execution log 2](/images/execution_log_2.png)
+![Execution log 3](/images/execution_log_3.png)
 
 
