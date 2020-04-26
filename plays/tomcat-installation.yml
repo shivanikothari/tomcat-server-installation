@@ -1,0 +1,5 @@
+- name: Tomcat Deployment
+  hosts: tomcat-nodes
+  become: yes
+  roles:
+    - tomcat-installation

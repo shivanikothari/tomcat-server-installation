@@ -1,0 +1,59 @@
+---
+- name: Install Java
+  yum:
+    name: java-1.8.0-openjdk
+    state: present
+  when: "ansible_os_family == 'RedHat'"
+
+- name: Install Java
+  apt:
+    name: openjdk-8-jdk
+    state: present
+  when: "ansible_os_family == 'Debian'"
+
+- name: Create tomcat users
+  user: 
+    name: "{{ item[0] }}"
+    group: "{{ item[1] }}"
+    password: "{{ item[2] | password_hash('sha512')}}"
+    shell: /bin/bash 
+    createhome: yes 
+    home: "{{ item[3] }}"
+    state: present
+  with_nested:
+    - "{{ tomcat_users }}"
+
+- name: Download apache-tomcat-{{ tomcat_version }}.tar.gz
+  get_url:
+    url: "{{ tomcat_downloadURL }}"
+    dest: "{{ tomcat_archive_dest }}"
+    mode: 0755
+  register: download_tomcat_source
+  until: download_tomcat_source is succeeded
+  retries: 3
+
+- name: Unarchive apache-tomcat-{{ tomcat_version }}.tar.gz
+  unarchive:
+    src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+    dest: "{{ item[3] }}"
+    remote_src: True
+    group: "{{ item[1] }}"
+    owner: "{{ item[0] }}"
+    creates: "{{ item[3] }}/apache-tomcat-{{ tomcat_version }}"
+  with_nested:
+    - "{{ tomcat_users }}"
+
+- name: fix permissions
+  file:
+    path: "{{ item[3] }}"
+    group: "{{ item[1] }}"
+    owner: "{{ item[0] }}"
+    recurse: yes
+  with_nested:
+    - "{{ tomcat_users }}"
+
+- name: Clean up temporary files
+  file:
+    path: '{{ tomcat_archive_dest }}/apache-tomcat-{{ tomcat_version }}.tar.gz'
+    state: absent
+  changed_when: False

@@ -1,0 +1,35 @@
+---
+- name: Setup server.xml
+  vars:
+    shutdown_port: "{{ item[4] }}"
+    listen_address: "{{ item[5] }}"
+    connector_port: "{{ item[6] }}"
+    redirect_port: "{{ item[7] }}"
+    ajp_port: "{{ item[8] }}"
+  template:
+    src: "{{ tomcat_template_server }}"
+    dest: "{{ item[3] }}/apache-tomcat-{{ tomcat_version }}/conf/server.xml"
+  with_nested:
+    - "{{ tomcat_users }}"
+  notify: restart tomcat
+
+- name: Copy tomcat service file
+  vars:
+   tomcat_install_path: "{{ item[3] }}"
+   tomcat_service_name: "apache-tomcat-{{ tomcat_version }}"
+   tomcat_user: "{{ item[0] }}"
+   tomcat_group: "{{ item[1] }}"
+  template:
+    src: "{{ tomcat_template_systemd_service }}"
+    dest: /etc/systemd/system/{{ item[0] }}-tomcat.service
+  with_nested:
+    - "{{ tomcat_users }}"
+
+- name: Start and enable tomcat service
+  systemd:
+    name: "{{ item[0] }}-tomcat.service"
+    state: started
+    enabled: true
+    daemon_reload: true
+  with_nested:
+    - "{{ tomcat_users }}"

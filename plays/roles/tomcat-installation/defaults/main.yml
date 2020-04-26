@@ -1,0 +1,15 @@
+---
+# Owner
+tomcat_users:
+# - [ 'user', 'group', 'password', 'home', 'shutdown_port', 'listen_address', 'connector_port', 'redirect_port', 'ajp_port' ]
+  - [ 'user1', 'tomcat', 'changeme', "/home/user1", '8005', '0.0.0.0', '8080', '8443', '8009' ]
+
+# Install Tomcat:
+tomcat_version: 8.5.42
+tomcat_downloadURL: https://archive.apache.org/dist/tomcat/tomcat-{{ tomcat_version.split('.')[0] }}/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz
+tomcat_archive_dest: /tmp/
+
+# Configure Tomcat:
+tomcat_template_server: "tomcat-server-{{ '.'.join(tomcat_version.split('.')[:2]) }}.xml.j2"
+tomcat_template_systemd_service: "tomcat.service.j2"
+
